@@ -21,6 +21,13 @@ describe('font matching (FR-5)', () => {
     expect(matchFont({ family: 'Inter', style: 'SemiBold' }, candidates)).not.toBeNull()
   })
 
+  it('matches a weight folded into the family name with subfamily Regular', () => {
+    // e.g. static instances cut from a variable font (fonttools --update-name-table)
+    // report family "Inter Medium", subfamily "Regular" per OpenType convention.
+    const candidates = [candidate('Inter Medium', 'Regular'), candidate('Inter', 'Bold')]
+    expect(matchFont({ family: 'Inter', style: 'Medium' }, candidates)?.value).toBe('Inter Medium/Regular')
+  })
+
   it('matches via postscript name as a last resort', () => {
     const candidates = [candidate('Anything', 'Whatever', 'SourceSerif-Italic')]
     expect(matchFont({ family: 'Source Serif', style: 'Italic' }, candidates)).not.toBeNull()

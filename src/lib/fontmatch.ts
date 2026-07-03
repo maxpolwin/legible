@@ -45,11 +45,16 @@ export function normalizeStyle(style: string): string {
  *  1. family + subfamily exact (normalized)
  *  2. "family subfamily" concatenation matches Figma family (some families
  *     surface weights inside the family name, e.g. "Inter Display Bold")
- *  3. postscript name `Family-Style`
+ *  3. candidate's family alone matches "family style" (the reverse case: a
+ *     non-bold/italic weight folded into the family name per OpenType
+ *     convention, subfamily "Regular" — e.g. static instances cut from a
+ *     variable font report family "Inter Medium", subfamily "Regular")
+ *  4. postscript name `Family-Style`
  */
 export function matchFont<T>(needed: FontKey, candidates: Array<FontCandidate<T>>): FontCandidate<T> | null {
   const family = normalizeFamily(needed.family)
   const style = normalizeStyle(needed.style)
+  const wantedConcat = normalizeFamily(`${needed.family} ${needed.style}`)
 
   for (const c of candidates) {
     if (normalizeFamily(c.info.familyName) === family && normalizeStyle(c.info.subfamilyName) === style) {
@@ -58,7 +63,12 @@ export function matchFont<T>(needed: FontKey, candidates: Array<FontCandidate<T>
   }
   for (const c of candidates) {
     const concat = normalizeFamily(`${c.info.familyName} ${c.info.subfamilyName}`)
-    if (concat === normalizeFamily(`${needed.family} ${needed.style}`) || concat === family) {
+    if (concat === wantedConcat || concat === family) {
+      return c
+    }
+  }
+  for (const c of candidates) {
+    if (normalizeFamily(c.info.familyName) === wantedConcat) {
       return c
     }
   }
