@@ -119,6 +119,11 @@ Main thread extracts (Figma APIs live there); the UI iframe owns fonts and
 PDF construction; both sides share the pure `lib/` modules, which is what
 makes the pipeline unit-testable outside Figma.
 
+## Support
+
+Found a bug or have a question? Open an issue at
+[github.com/maxpolwin/legible/issues](https://github.com/maxpolwin/legible/issues).
+
 ## License
 
 [MIT](LICENSE). Test fonts (Lato, EB Garamond) are fetched at dev time under
