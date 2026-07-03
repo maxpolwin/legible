@@ -14,5 +14,8 @@ test/fixtures/
 # Visual-regression output
 visual-diff-out/
 
+# Local manual test exports (may contain real personal data)
+test/test pdfs/
+
 # OS noise
 .DS_Store

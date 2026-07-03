@@ -551,6 +551,20 @@ function Plugin(): JSX.Element {
       >
         Add font files (.ttf / .otf)…
       </FileUploadButton>
+      {state.neededFonts.some((needed) => fontStatuses.get(fontId(needed))?.kind !== 'ok') && (
+        <Fragment>
+          <VerticalSpace space="extraSmall" />
+          <Text>
+            <Muted>
+              Missing a font file? Most open-source fonts (Inter, Lato, Roboto…) are free at{' '}
+              <a href="https://fonts.google.com" target="_blank" rel="noreferrer">
+                fonts.google.com ↗
+              </a>
+              . Licensed fonts need their own source.
+            </Muted>
+          </Text>
+        </Fragment>
+      )}
       <VerticalSpace space="extraSmall" />
       <Toggle value={remember} onValueChange={setRemember}>
         <Text>Remember fonts on this machine</Text>
