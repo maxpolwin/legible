@@ -283,7 +283,7 @@ function Plugin(): JSX.Element {
       })
       if (!settingsLoaded.current) {
         settingsLoaded.current = true
-        setName(next.settings.filenameName)
+        setName(next.settings.filenameName || sanitizeName(next.fileName))
         setAuthor(next.settings.author)
         setLanguage(next.settings.language)
         setDpi(next.settings.dpi)

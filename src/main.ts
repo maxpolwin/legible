@@ -527,6 +527,7 @@ async function sendState(): Promise<void> {
   const settings = await loadSettings()
   const storedFonts = await loadStoredFonts()
   emit('STATE', {
+    fileName: figma.root.name,
     scopedAll,
     frames: summaries,
     neededFonts: [...neededFonts.values()],

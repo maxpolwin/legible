@@ -131,6 +131,14 @@
   overflow-y: auto;
 }
 
+/* The UI kit's base stylesheet sets `user-select: none` on all div/span,
+   which blocks copying the report text. Re-enable it here. */
+.report,
+.report * {
+  user-select: text;
+  cursor: text;
+}
+
 .report-entry {
   padding: 3px 0;
   border-bottom: 1px solid var(--figma-color-border, rgba(128, 128, 128, 0.15));

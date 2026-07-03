@@ -180,6 +180,8 @@ export const DEFAULT_SETTINGS: PluginSettings = {
 }
 
 export interface StateMessage {
+  /** The Figma file's name, used to default the export filename (FR-3). */
+  fileName: string
   /** True when nothing was selected and the whole file is in scope. */
   scopedAll: boolean
   frames: FrameSummary[]
