@@ -2,7 +2,7 @@
   <rect width="1920" height="1080" fill="#eef1f6" />
 
   <!-- icon badge (matches assets/icon.svg) -->
-  <g transform="translate(120,130) scale(0.86)">
+  <g transform="translate(120,371) scale(0.86)">
     <rect x="8" y="8" width="112" height="112" rx="28" fill="#ffffff" stroke="#c7cfdc" stroke-width="2" />
     <line x1="64" y1="26" x2="64" y2="102" stroke="#c7cfdc" stroke-width="2" />
     <line x1="24" y1="46" x2="54" y2="46" stroke="#9aa4b2" stroke-width="6" stroke-linecap="round" stroke-dasharray="4 6" />
@@ -13,36 +13,36 @@
     <line x1="74" y1="78" x2="96" y2="78" stroke="#0d6fd1" stroke-width="6" stroke-linecap="round" />
   </g>
 
-  <text x="122" y="98" font-family="Helvetica, Arial, sans-serif" font-size="24" font-weight="700"
+  <text x="122" y="339" font-family="Helvetica, Arial, sans-serif" font-size="24" font-weight="700"
         letter-spacing="3" fill="#0d6fd1">FIGMA PLUGIN</text>
 
-  <text x="262" y="215" font-family="Helvetica, Arial, sans-serif" font-size="76" font-weight="700"
+  <text x="262" y="456" font-family="Helvetica, Arial, sans-serif" font-size="76" font-weight="700"
         fill="#1b2430">Legible</text>
 
-  <text x="122" y="330" font-family="Helvetica, Arial, sans-serif" font-size="36" fill="#3a4250">
+  <text x="122" y="571" font-family="Helvetica, Arial, sans-serif" font-size="36" fill="#3a4250">
     <tspan x="122" dy="0">Real text PDFs from Figma —</tspan>
     <tspan x="122" dy="46">not vector outlines.</tspan>
   </text>
 
-  <text x="122" y="470" font-family="Helvetica, Arial, sans-serif" font-size="27" fill="#6b7480">
+  <text x="122" y="711" font-family="Helvetica, Arial, sans-serif" font-size="27" fill="#6b7480">
     <tspan x="122" dy="0">Selectable · Searchable · Tagged &amp; screen-reader ready</tspan>
     <tspan x="122" dy="42">ATS-parseable · Real embedded fonts · 100% offline</tspan>
   </text>
 
   <!-- outline-to-text motif panel -->
-  <rect x="1080" y="140" width="780" height="800" rx="48" fill="#e4e9f2" stroke="#c7cfdc" stroke-width="2" />
-  <line x1="1470" y1="300" x2="1470" y2="780" stroke="#c7cfdc" stroke-width="3" />
+  <rect x="1080" y="330" width="780" height="640" rx="48" fill="#e4e9f2" stroke="#c7cfdc" stroke-width="2" />
+  <line x1="1470" y1="490" x2="1470" y2="930" stroke="#c7cfdc" stroke-width="3" />
 
-  <line x1="1200" y1="380" x2="1430" y2="380" stroke="#9aa4b2" stroke-width="14" stroke-linecap="round" stroke-dasharray="10 18" />
-  <line x1="1200" y1="500" x2="1430" y2="500" stroke="#9aa4b2" stroke-width="14" stroke-linecap="round" stroke-dasharray="10 18" />
-  <line x1="1200" y1="620" x2="1350" y2="620" stroke="#9aa4b2" stroke-width="14" stroke-linecap="round" stroke-dasharray="10 18" />
+  <line x1="1200" y1="570" x2="1430" y2="570" stroke="#9aa4b2" stroke-width="14" stroke-linecap="round" stroke-dasharray="10 18" />
+  <line x1="1200" y1="690" x2="1430" y2="690" stroke="#9aa4b2" stroke-width="14" stroke-linecap="round" stroke-dasharray="10 18" />
+  <line x1="1200" y1="810" x2="1350" y2="810" stroke="#9aa4b2" stroke-width="14" stroke-linecap="round" stroke-dasharray="10 18" />
 
-  <line x1="1510" y1="380" x2="1740" y2="380" stroke="#0d6fd1" stroke-width="14" stroke-linecap="round" />
-  <line x1="1510" y1="500" x2="1740" y2="500" stroke="#0d6fd1" stroke-width="14" stroke-linecap="round" />
-  <line x1="1510" y1="620" x2="1660" y2="620" stroke="#0d6fd1" stroke-width="14" stroke-linecap="round" />
+  <line x1="1510" y1="570" x2="1740" y2="570" stroke="#0d6fd1" stroke-width="14" stroke-linecap="round" />
+  <line x1="1510" y1="690" x2="1740" y2="690" stroke="#0d6fd1" stroke-width="14" stroke-linecap="round" />
+  <line x1="1510" y1="810" x2="1660" y2="810" stroke="#0d6fd1" stroke-width="14" stroke-linecap="round" />
 
-  <text x="1200" y="700" font-family="Helvetica, Arial, sans-serif" font-size="22" font-weight="700"
+  <text x="1200" y="890" font-family="Helvetica, Arial, sans-serif" font-size="22" font-weight="700"
         letter-spacing="1" fill="#6b7480">OUTLINES</text>
-  <text x="1510" y="700" font-family="Helvetica, Arial, sans-serif" font-size="22" font-weight="700"
+  <text x="1510" y="890" font-family="Helvetica, Arial, sans-serif" font-size="22" font-weight="700"
         letter-spacing="1" fill="#0d6fd1">REAL TEXT</text>
 </svg>

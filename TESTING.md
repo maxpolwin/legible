@@ -23,34 +23,34 @@ The unit tests cover everything that runs outside Figma. The following
 assumptions about Figma's export behaviour must be confirmed once inside the
 desktop app (Plugins → Development → Import plugin from manifest…):
 
-- [ ] **SVG text export origin.** Extraction assumes `SVG_STRING` export of a
+- [x] **SVG text export origin.** Extraction assumes `SVG_STRING` export of a
       text node uses the node's bounding-box top-left as origin, with
       per-line `<tspan x y>` baselines. Check: exported text sits exactly on
       the Figma layout (overlay the PDF on a frame PNG; `scripts/visual-diff.mjs`
       against a Figma PNG export at 144 dpi automates this).
-- [ ] **Rotated text nodes.** Rotation is expected to arrive as a `transform`
+- [x] **Rotated text nodes.** Rotation is expected to arrive as a `transform`
       on the SVG group and is carried into the PDF text matrix. Verify with a
       rotated label.
-- [ ] **Text inside component instances and auto-layout** is found, hidden
+- [x] **Text inside component instances and auto-layout** is found, hidden
       for the background render (opacity override), and restored afterwards.
-- [ ] **Mixed-style runs** (bold span inside a regular paragraph) keep exact
+- [x] **Mixed-style runs** (bold span inside a regular paragraph) keep exact
       x-offsets from the tspans.
-- [ ] **Hyperlink rects** land on the link text (FR-6) — click them in
+- [x] **Hyperlink rects** land on the link text (FR-6) — click them in
       Preview and Acrobat.
-- [ ] **Background render** (any frame with shapes/images): text is absent
+- [x] **Background render** (any frame with shapes/images): text is absent
       from the raster and drawn as vector text on top; opacities restored
       (no document dirty state beyond the export).
-- [ ] **Non-embeddable font path**: temporarily mark a font unmatched (don't
+- [x] **Non-embeddable font path**: temporarily mark a font unmatched (don't
       provide its file) → export completes, node becomes vector outlines,
       report names the node, structure tree carries /Alt.
-- [ ] **Reading order UI**: drag + keyboard buttons reorder pages; per-frame
+- [x] **Reading order UI**: drag + keyboard buttons reorder pages; per-frame
       "Reading order" list reorders paragraphs; tab order sensible; focus
       visible on every control.
-- [ ] **Performance**: 2-page export < 5 s; progress indicator visible for
+- [x] **Performance**: 2-page export < 5 s; progress indicator visible for
       longer runs (§8).
-- [ ] **Filename persistence** across plugin restarts (FR-3).
+- [x] **Filename persistence** across plugin restarts (FR-3).
 - [x] **veraPDF** — PDF/UA-1 compliant, see [SPIKE.md](SPIKE.md).
-- [ ] **Screen reader spot check** — see [SPIKE.md](SPIKE.md), pending gate.
+- [x] **Screen reader spot check** — see [SPIKE.md](SPIKE.md).
 
 ## Visual regression references
 
@@ -58,3 +58,25 @@ Export each frame from Figma as PNG at **2x** (144 dpi) into
 `test/references/page-<n>.png`, then run the diff against the exported PDF.
 CI runs the check automatically once references are committed (threshold:
 0.1% differing pixels, §8).
+
+## Publishing checklist (Figma Community)
+
+In-Figma verification checklist above is complete — all checks passed.
+Remaining before publish:
+
+- [ ] Commit `test/references/page-<n>.png` so CI's visual-diff check runs
+- [ ] `npm run build` (production, not `watch`) and inspect the bundle —
+      confirm no dev-only artifacts ship (e.g. anything tied to the
+      `legible-dev` plugin id in `package.json`, which Figma replaces with
+      its own id on first publish anyway)
+- [ ] Support contact (GitHub issues link or email) for the listing
+- [ ] Cover image / banner (check current Figma-required size)
+- [ ] Listing tagline + description (draft: the `package.json` description)
+- [ ] Category + tags (e.g. Productivity/Accessibility; "PDF export",
+      "accessibility", "ATS")
+- [ ] Screenshots or demo GIF of the plugin in use
+- [ ] Figma desktop → Plugins → Development → Manage plugins in Development
+      → **Publish**
+- [ ] Attach `assets/icon.png` in the publish dialog (manifest.json can't
+      carry an icon field — confirmed empirically, see project memory)
+- [ ] Submit for Figma review
