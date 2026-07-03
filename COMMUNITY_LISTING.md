@@ -81,10 +81,13 @@ Carousel screenshots, captured against a dummy Lorem Ipsum CV in Figma:
   — the reading-order list, showing every paragraph with up/down reorder
   controls.
 
-- [assets/demo.gif](assets/demo.gif) — a full feature-tour GIF: fonts going
-  ready, reordering paragraphs in the reading-order list, setting the PDF
+- [assets/demo.mp4](assets/demo.mp4) — a full feature-tour video (converted
+  from `assets/demo.gif`, which Figma's carousel picker rejects — it only
+  accepts static images and video, not animated GIF): fonts going ready,
+  reordering paragraphs in the reading-order list, setting the PDF
   author/locale metadata, sliding the DPI control from ATS through Balanced
-  to Print, and exporting.
+  to Print, and exporting. `assets/demo.gif` is kept in the repo for use
+  elsewhere (e.g. the README), just not uploaded to Community.
 
 Figma allows up to 9 images/videos in the carousel, so there's room for more
 if useful.
