@@ -66,10 +66,20 @@ https://github.com/maxpolwin/legible/issues
 
 ## Cover image / carousel
 
-Draft cover banner: [assets/cover.png](assets/cover.png) (1920×1080, reuses
-the icon's outline-to-text motif). Figma allows up to 9 additional
-images/videos in the carousel — **not started**: genuine in-product
-screenshots require running the plugin inside the Figma desktop app, which
-this environment cannot do. Grab these once you've done the in-Figma
-verification pass in [TESTING.md](TESTING.md) — the export report panel and
-the reading-order UI are the two screens most worth showing.
+Cover banner: [assets/cover.png](assets/cover.png) (1920×1080, reuses the
+icon's outline-to-text motif).
+
+Carousel screenshots, captured against a dummy Lorem Ipsum CV in Figma:
+
+- [assets/screenshot-cv-pages.png](assets/screenshot-cv-pages.png) — the
+  two-page demo CV rendered in Figma, showing headings, mixed bold/italic
+  subheadings, bullet lists, and a live hyperlink.
+- [assets/screenshot-report.png](assets/screenshot-report.png) — the Legible
+  panel with fonts embedded and ready ("Lato Bold ready" / "Lato Regular
+  ready") right before export.
+- [assets/screenshot-reading-order.png](assets/screenshot-reading-order.png)
+  — the reading-order list, showing every paragraph with up/down reorder
+  controls.
+
+Figma allows up to 9 images/videos in the carousel, so there's room for more;
+a short drag-reorder demo GIF is still **not started**.
