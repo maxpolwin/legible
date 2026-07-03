@@ -1,6 +1,6 @@
 # Spike: PDF construction library (§12 decision)
 
-**Status: pdf-lib selected (per the default decision rule) and confirmed by
+**Status: pdf-lib selected and approved (2026-07-03, Max). Confirmed by
 veraPDF (PDF/UA-1, 106/106 rules, 1189/1189 checks — see below). Screen-reader
 spot check still pending; see "Pending validation" below.**
 
