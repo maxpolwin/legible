@@ -1,0 +1,50 @@
+{
+  "name": "legible",
+  "version": "0.1.0",
+  "description": "Export Figma frames as genuinely machine-readable PDFs — selectable, searchable, ATS-parseable, screen-reader-navigable.",
+  "license": "MIT",
+  "private": true,
+  "scripts": {
+    "build": "build-figma-plugin --typecheck --minify",
+    "watch": "build-figma-plugin --typecheck --watch",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "fixtures": "sh scripts/fetch-fixtures.sh",
+    "demo": "esbuild scripts/make-demo.ts --bundle --platform=node --format=esm --outfile=demo/make-demo.mjs --log-level=error && node demo/make-demo.mjs"
+  },
+  "dependencies": {
+    "@create-figma-plugin/ui": "^4.0.3",
+    "@create-figma-plugin/utilities": "^4.0.3",
+    "@pdf-lib/fontkit": "^1.1.1",
+    "pdf-lib": "^1.17.1",
+    "preact": "^10.25.0"
+  },
+  "devDependencies": {
+    "@create-figma-plugin/build": "^4.0.3",
+    "@create-figma-plugin/tsconfig": "^4.0.3",
+    "@figma/plugin-typings": "^1.100.0",
+    "@napi-rs/canvas": "^1.0.2",
+    "esbuild": "^0.28.1",
+    "pdfjs-dist": "^4.10.38",
+    "pixelmatch": "^7.2.0",
+    "pngjs": "^7.0.0",
+    "typescript": "^5.6.0",
+    "vitest": "^3.0.0"
+  },
+  "figma-plugin": {
+    "editorType": [
+      "figma"
+    ],
+    "id": "legible-dev",
+    "name": "Legible",
+    "main": "src/main.ts",
+    "ui": "src/ui.tsx",
+    "documentAccess": "dynamic-page",
+    "networkAccess": {
+      "allowedDomains": [
+        "none"
+      ],
+      "reasoning": "Legible is fully offline by design: no network access, no telemetry, no analytics."
+    }
+  }
+}

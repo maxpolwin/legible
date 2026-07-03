@@ -1,0 +1,58 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - name: Fetch font fixtures (test-only; the plugin itself is offline)
+        run: npm run fixtures
+      - name: Unit + integration tests
+        run: npm test
+      - name: Build plugin (typecheck + bundle)
+        run: npm run build
+      - name: Generate demo PDF
+        run: npm run demo
+      - name: Visual regression (no-op until references are checked in)
+        run: node scripts/visual-diff.mjs demo/legible-demo.pdf test/references
+      - uses: actions/upload-artifact@v4
+        with:
+          name: demo-pdf
+          path: demo/legible-demo.pdf
+
+  gitleaks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  semgrep:
+    runs-on: ubuntu-latest
+    container:
+      image: semgrep/semgrep
+    steps:
+      - uses: actions/checkout@v4
+      - run: semgrep ci --config auto
+        env:
+          SEMGREP_RULES: p/typescript p/javascript p/secrets
+
+  # Socket.dev supply-chain scanning runs via the Socket GitHub App once the
+  # repo is on GitHub — install it from https://socket.dev; no workflow step
+  # is needed here.

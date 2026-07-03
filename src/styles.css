@@ -1,0 +1,174 @@
+/* Legible UI — follows Figma's editor theme via --figma-color-* variables.
+   WCAG 2.1 AA: visible focus, color never alone, native controls. */
+
+:root {
+  --legible-radius: 6px;
+}
+
+*:focus-visible {
+  outline: 2px solid var(--figma-color-border-selected, #0d99ff);
+  outline-offset: 1px;
+  border-radius: 2px;
+}
+
+.section-title {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--figma-color-text, #fff);
+  letter-spacing: 0.2px;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 6px;
+  border-radius: var(--legible-radius);
+  border: 1px solid var(--figma-color-border, rgba(128, 128, 128, 0.3));
+  background: var(--figma-color-bg-secondary, rgba(128, 128, 128, 0.08));
+  margin-bottom: 4px;
+}
+
+.row[draggable='true'] {
+  cursor: grab;
+}
+
+.row.drag-over {
+  border-color: var(--figma-color-border-selected, #0d99ff);
+}
+
+.row .grow {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.muted {
+  color: var(--figma-color-text-secondary, rgba(255, 255, 255, 0.6));
+}
+
+.small {
+  font-size: 10px;
+}
+
+.iconbtn {
+  appearance: none;
+  border: none;
+  background: transparent;
+  color: var(--figma-color-text, #fff);
+  border-radius: 4px;
+  width: 22px;
+  height: 22px;
+  line-height: 1;
+  cursor: pointer;
+  font-size: 11px;
+  padding: 0;
+}
+
+.iconbtn:hover:not(:disabled) {
+  background: var(--figma-color-bg-hover, rgba(128, 128, 128, 0.2));
+}
+
+.iconbtn:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.textbtn {
+  appearance: none;
+  border: none;
+  background: transparent;
+  color: var(--figma-color-text-brand, #7cc4f8);
+  cursor: pointer;
+  font-size: 10px;
+  padding: 2px 4px;
+  border-radius: 4px;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 600;
+  border: 1px solid;
+}
+
+.badge-ats {
+  color: var(--figma-color-text-onbrand, #0a4d21);
+  border-color: transparent;
+  background: var(--figma-color-bg-success, #79d297);
+}
+
+.badge-balanced {
+  color: #1a2c56;
+  border-color: transparent;
+  background: #93b8f2;
+}
+
+.badge-print {
+  color: #4d3305;
+  border-color: transparent;
+  background: #f2c078;
+}
+
+.font-status {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 0;
+}
+
+.report {
+  border: 1px solid var(--figma-color-border, rgba(128, 128, 128, 0.3));
+  border-radius: var(--legible-radius);
+  padding: 6px 8px;
+  max-height: 160px;
+  overflow-y: auto;
+}
+
+.report-entry {
+  padding: 3px 0;
+  border-bottom: 1px solid var(--figma-color-border, rgba(128, 128, 128, 0.15));
+}
+
+.report-entry:last-child {
+  border-bottom: none;
+}
+
+.sublist {
+  margin: 0 0 6px 14px;
+  padding: 0;
+  list-style: none;
+}
+
+.dpi-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.dpi-row input[type='number'] {
+  width: 64px;
+  background: var(--figma-color-bg-secondary, rgba(128, 128, 128, 0.1));
+  color: var(--figma-color-text, #fff);
+  border: 1px solid var(--figma-color-border, rgba(128, 128, 128, 0.3));
+  border-radius: 4px;
+  padding: 4px 6px;
+  font-size: 11px;
+}
+
+.dpi-row input[type='range'] {
+  flex: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.001s !important;
+    transition-duration: 0.001s !important;
+  }
+}

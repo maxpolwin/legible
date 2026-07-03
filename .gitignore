@@ -1,0 +1,18 @@
+# Dependencies
+node_modules/
+
+# Generated build output (run `npm run build`; Figma imports manifest.json)
+build/
+manifest.json
+
+# Generated demo output
+demo/
+
+# Test fixtures are fetched, not committed (fonts carry their own licenses)
+test/fixtures/
+
+# Visual-regression output
+visual-diff-out/
+
+# OS noise
+.DS_Store
