@@ -49,20 +49,63 @@ real body copy.
 
 ## Category
 
-Closest official fits: **Productivity** or **Accessibility** if either
-exists in the live dropdown at publish time; otherwise **Design tools**.
+**Apps** — confirmed live in the publish wizard 2026-07-03 (there is no
+Productivity/Accessibility category for plugins; those only appear as
+sub-categories under Print/templates. Apps is the top-level category Figma
+uses for plugins.)
 
 ## Tags (max 5)
 
-1. PDF export
-2. accessibility
-3. ATS
-4. screen reader
-5. tagged PDF
+Confirmed live in the publish wizard 2026-07-03 — typed into "Custom tags"
+one at a time, each matched an existing tag via Figma's autocomplete
+(shown with a resource count), so these are the exact strings to reuse:
+
+1. pdf
+2. ats
+3. cv
+4. accessibility
+5. screen reader
+
+## Data security questionnaire
+
+Step 3 of the publish wizard ("Data security") requires checking "I agree to
+share this information", which then reveals a 5-question form. Answers below
+are derived directly from the source (`figma-plugin.networkAccess` in
+`package.json`, and the `figma.clientStorage` calls in `src/main.ts`) and
+should stay correct as long as those don't change:
+
+1. **Do you host a backend service for your plugin/widget?**
+   → "No, I do not host a backend service for my plugin/widget."
+2. **Does your plugin/widget make any network requests with services you do
+   not host?**
+   → "My plugin/widget does not make any network requests." (matches
+   `networkAccess.allowedDomains: ["none"]`)
+3. **Does your plugin/widget use any user authentication?**
+   → "No, my plugin/widget does not require or use any user authentication."
+4. **Do you store any data read/derived from Figma's plugin API?**
+   → "Yes, my plugin/widget stores data read/derived from Figma's plugin API
+   locally (eg. localStorage, figma.clientStorage, or node.setPluginData)."
+   (true: `figma.root.name` and font files are persisted via
+   `figma.clientStorage`, all local to the user's machine)
+5. **How do you manage updates to your plugin/widget?**
+   → "I am a solo developer. I manage and update my plugin/widget myself."
+
+## Plugin ID
+
+Figma generates this on Step 4 ("Add the final details") via a
+"Generate ID..." button next to "Invalid ID in manifest.json" — already
+done: `1654888182581252507`, committed into `figma-plugin.id` in
+`package.json` (replacing the `legible-dev` dev placeholder), which
+`npm run build` turns into `manifest.json`. No need to regenerate on a
+repeat pass through the wizard; it should show as valid immediately.
 
 ## Support contact
 
 https://github.com/maxpolwin/legible/issues
+
+Note: the wizard pre-fills this field with the Figma account's own email
+(a `@simplelogin.com` alias) — it must be manually cleared and replaced with
+the URL above.
 
 ## Cover image / carousel
 
