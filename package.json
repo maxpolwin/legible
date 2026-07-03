@@ -37,7 +37,6 @@
     ],
     "id": "legible-dev",
     "name": "Legible",
-    "icon": "assets/icon.png",
     "main": "src/main.ts",
     "ui": "src/ui.tsx",
     "documentAccess": "dynamic-page",
