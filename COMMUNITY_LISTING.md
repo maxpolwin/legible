@@ -81,5 +81,10 @@ Carousel screenshots, captured against a dummy Lorem Ipsum CV in Figma:
   — the reading-order list, showing every paragraph with up/down reorder
   controls.
 
-Figma allows up to 9 images/videos in the carousel, so there's room for more;
-a short drag-reorder demo GIF is still **not started**.
+- [assets/demo.gif](assets/demo.gif) — a full feature-tour GIF: fonts going
+  ready, reordering paragraphs in the reading-order list, setting the PDF
+  author/locale metadata, sliding the DPI control from ATS through Balanced
+  to Print, and exporting.
+
+Figma allows up to 9 images/videos in the carousel, so there's room for more
+if useful.
