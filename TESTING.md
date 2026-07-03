@@ -49,7 +49,8 @@ desktop app (Plugins → Development → Import plugin from manifest…):
 - [ ] **Performance**: 2-page export < 5 s; progress indicator visible for
       longer runs (§8).
 - [ ] **Filename persistence** across plugin restarts (FR-3).
-- [ ] **veraPDF + screen reader** — see [SPIKE.md](SPIKE.md), pending gate.
+- [x] **veraPDF** — PDF/UA-1 compliant, see [SPIKE.md](SPIKE.md).
+- [ ] **Screen reader spot check** — see [SPIKE.md](SPIKE.md), pending gate.
 
 ## Visual regression references
 

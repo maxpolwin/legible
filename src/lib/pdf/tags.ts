@@ -230,3 +230,40 @@ export class StructTreeBuilder {
     this.doc.catalog.getOrCreateViewerPreferences().setDisplayDocTitle(true)
   }
 }
+
+function escapeXmlText(value: string): string {
+  return value.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+}
+
+/**
+ * Attaches an XMP metadata stream to the Catalog (ISO 14289-1:2014 §7.1;
+ * PDF/UA also expects the pdfuaid:part identifier). pdf-lib only writes the
+ * classic Info dictionary, so this is built and registered by hand.
+ */
+export function attachMetadataStream(
+  doc: PDFDocument,
+  meta: { title: string; author?: string; language?: string }
+): void {
+  const title = escapeXmlText(meta.title)
+  const author = meta.author ? escapeXmlText(meta.author) : ''
+  const lang = meta.language ?? 'x-default'
+  const xmp = `<?xpacket begin="﻿" id="W5M0MpCehiHzreSzNTczkc9d"?>
+<x:xmpmeta xmlns:x="adobe:ns:meta/">
+  <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+    <rdf:Description rdf:about=""
+        xmlns:dc="http://purl.org/dc/elements/1.1/"
+        xmlns:pdfuaid="http://www.aiim.org/pdfua/ns/id/">
+      <dc:title><rdf:Alt><rdf:li xml:lang="${lang}">${title}</rdf:li></rdf:Alt></dc:title>
+      ${author ? `<dc:creator><rdf:Seq><rdf:li>${author}</rdf:li></rdf:Seq></dc:creator>` : ''}
+      <pdfuaid:part>1</pdfuaid:part>
+    </rdf:Description>
+  </rdf:RDF>
+</x:xmpmeta>
+<?xpacket end="w"?>`
+  const stream = doc.context.stream(xmp, {
+    Type: 'Metadata',
+    Subtype: 'XML',
+  })
+  const streamRef = doc.context.register(stream)
+  doc.catalog.set(PDFName.of('Metadata'), streamRef)
+}

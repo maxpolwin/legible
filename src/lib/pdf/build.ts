@@ -36,7 +36,7 @@ import type {
 } from '../types'
 import { fontId as makeFontId } from '../types'
 import * as ops from './ops'
-import { StructTreeBuilder, type PageStructContext, type ParagraphKid } from './tags'
+import { attachMetadataStream, StructTreeBuilder, type PageStructContext, type ParagraphKid } from './tags'
 
 export interface BuildInput {
   frames: ExtractedFrame[]
@@ -387,6 +387,9 @@ function drawTextNode(
         annot.set(PDFName.of('Contents'), PDFString.of(link))
         const annotRef = doc.context.register(annot)
         page.node.addAnnot(annotRef)
+        // PDF/UA (ISO 14289-1 §7.18.3): a page with any annotation must
+        // declare its tab order explicitly; /S follows structure order.
+        page.node.set(PDFName.of('Tabs'), PDFName.of('S'))
         kids.push({ kind: 'link', mcid, annotRef, url: link })
         annots.push({ key: structParent, mcid, ref: annotRef })
         continue
@@ -449,6 +452,7 @@ export async function buildPdf(input: BuildInput): Promise<BuildOutput> {
   doc.setCreator('Legible (Figma plugin)')
   doc.setProducer('Legible')
   if (input.meta.language) doc.setLanguage(input.meta.language)
+  attachMetadataStream(doc, input.meta)
 
   const bytes = await doc.save({ useObjectStreams: false })
   return { bytes, report }

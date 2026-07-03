@@ -1,7 +1,8 @@
 # Spike: PDF construction library (§12 decision)
 
-**Status: pdf-lib selected (per the default decision rule). Review before FR-1 goes
-into production use — see "Pending validation" below.**
+**Status: pdf-lib selected (per the default decision rule) and confirmed by
+veraPDF (PDF/UA-1, 106/106 rules, 1189/1189 checks — see below). Screen-reader
+spot check still pending; see "Pending validation" below.**
 
 ## Decision rule (from requirements §12)
 
@@ -46,14 +47,25 @@ neither happened. The known trade-offs stand as researched: first-class
 structure-tree API vs. WASM toolchain, bundle size, and CSP/eval concerns in
 the plugin iframe.
 
+## veraPDF result (2026-07-03)
+
+`veraPDF --flavour ua1 demo/legible-demo.pdf`: initially 2 failures out of
+1182 checks — both incremental gaps, not architecture problems, exactly as
+anticipated:
+
+- ISO 14289-1:2014 §7.18.3: pages with a link annotation need `/Tabs /S`.
+  Fixed in [build.ts](src/lib/pdf/build.ts) where the link annotation is
+  added to the page.
+- ISO 14289-1:2014 §7.1: the Catalog needs an XMP metadata stream. Added
+  `attachMetadataStream()` in [tags.ts](src/lib/pdf/tags.ts), wired from
+  `buildPdf` in `build.ts`.
+
+Re-run after the fix: **compliant**, 106/106 rules, 1189/1189 checks.
+
 ## Pending validation (the review gate)
 
-1. **veraPDF**: not yet run (needs a local Java runtime). Command:
-   `veraPDF --flavour ua1 demo/legible-demo.pdf` after `npm run demo`.
-   The structure produced follows ISO 32000-1 §14.7/14.8; if veraPDF flags
-   gaps (e.g. role-map or heading-level expectations for PDF/UA), they are
-   incremental fixes in `tags.ts`, not architecture changes.
+1. ~~veraPDF~~ — done, compliant (above).
 2. **Screen-reader spot check** on a real export (VoiceOver + Preview/Acrobat).
 
-If either fails in a way that pdf-lib cannot express, revisit the
-pdf-writer/WASM branch per the original decision rule.
+If a future screen-reader check surfaces something pdf-lib cannot express,
+revisit the pdf-writer/WASM branch per the original decision rule.
