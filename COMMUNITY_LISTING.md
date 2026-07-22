@@ -17,7 +17,7 @@ Nothing is selectable, nothing is searchable, and applicant-tracking systems
 (Greenhouse & friends) extract zero characters from a Figma-designed résumé.
 Screen readers get nothing either — just shapes.
 
-Legible PDF rebuilds the export instead of outlining it: real, embedded,
+legible PDF rebuilds the export instead of outlining it: real, embedded,
 subsetted fonts and a hand-built tagged PDF structure tree, laid out exactly
 where Figma drew it.
 
@@ -39,7 +39,7 @@ where Figma drew it.
   you exactly what happened and where
 
 **Why it asks for font files:** the Figma plugin API doesn't expose font
-binaries, and Legible PDF makes zero network requests by design — everything
+binaries, and legible PDF makes zero network requests by design — everything
 runs offline, with no telemetry. So the first export asks you to drop in the
 `.ttf`/`.otf` files your design uses; it remembers them for next time.
 
@@ -117,7 +117,7 @@ Carousel screenshots, captured against a dummy Lorem Ipsum CV in Figma:
 - [assets/screenshot-cv-pages.png](assets/screenshot-cv-pages.png) — the
   two-page demo CV rendered in Figma, showing headings, mixed bold/italic
   subheadings, bullet lists, and a live hyperlink.
-- [assets/screenshot-report.png](assets/screenshot-report.png) — the Legible
+- [assets/screenshot-report.png](assets/screenshot-report.png) — the legible
   PDF panel with fonts embedded and ready ("Lato Bold ready" / "Lato Regular
   ready") right before export.
 - [assets/screenshot-reading-order.png](assets/screenshot-reading-order.png)

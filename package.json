@@ -37,7 +37,7 @@
       "figma"
     ],
     "id": "1654888182581252507",
-    "name": "Legible PDF",
+    "name": "legible PDF",
     "main": "src/main.ts",
     "ui": "src/ui.tsx",
     "documentAccess": "dynamic-page",
