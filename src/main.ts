@@ -1,5 +1,5 @@
 /**
- * Legible — Figma main thread.
+ * Legible PDF — Figma main thread.
  *
  * Responsibilities: scope resolution (selection vs whole file), text/style
  * extraction via SVG export + styled segments, background rendering with
@@ -474,7 +474,7 @@ async function loadSettings(): Promise<PluginSettings> {
   return { ...DEFAULT_SETTINGS, ...stored }
 }
 
-async function loadStoredFonts(): Promise<Array<{ meta: StoredFontMeta; bytes: Uint8Array }>> {
+export async function loadStoredFonts(): Promise<Array<{ meta: StoredFontMeta; bytes: Uint8Array }>> {
   const index = ((await figma.clientStorage.getAsync(FONT_INDEX_KEY)) as StoredFontMeta[] | undefined) ?? []
   const out: Array<{ meta: StoredFontMeta; bytes: Uint8Array }> = []
   for (const meta of index) {
@@ -484,20 +484,45 @@ async function loadStoredFonts(): Promise<Array<{ meta: StoredFontMeta; bytes: U
   return out
 }
 
-async function storeFont(meta: StoredFontMeta, bytes: Uint8Array): Promise<void> {
-  const index = ((await figma.clientStorage.getAsync(FONT_INDEX_KEY)) as StoredFontMeta[] | undefined) ?? []
-  await figma.clientStorage.setAsync(FONT_DATA_PREFIX + meta.id, figma.base64Encode(bytes))
-  const next = [...index.filter((m) => m.id !== meta.id), meta]
-  await figma.clientStorage.setAsync(FONT_INDEX_KEY, next)
+/**
+ * Serializes reads/writes of FONT_INDEX_KEY. The UI's file picker allows
+ * dropping several font files at once (e.g. Inter's Regular/Bold/Italic/Bold
+ * Italic together), which fires one STORE_FONT per file without waiting for
+ * the previous one to finish. Without this lock, concurrent storeFont calls
+ * each read the same stale index before either writes it back, so whichever
+ * write lands last overwrites (drops) the others from the index — their
+ * data blobs stay in clientStorage but are never loaded again, which is why
+ * fonts appeared to need re-uploading every session.
+ */
+let fontIndexQueue: Promise<unknown> = Promise.resolve()
+
+function withFontIndexLock<T>(fn: () => Promise<T>): Promise<T> {
+  const result = fontIndexQueue.then(fn, fn)
+  fontIndexQueue = result.then(
+    () => undefined,
+    () => undefined
+  )
+  return result
 }
 
-async function deleteFont(id: string): Promise<void> {
-  const index = ((await figma.clientStorage.getAsync(FONT_INDEX_KEY)) as StoredFontMeta[] | undefined) ?? []
+export async function storeFont(meta: StoredFontMeta, bytes: Uint8Array): Promise<void> {
+  await figma.clientStorage.setAsync(FONT_DATA_PREFIX + meta.id, figma.base64Encode(bytes))
+  await withFontIndexLock(async () => {
+    const index = ((await figma.clientStorage.getAsync(FONT_INDEX_KEY)) as StoredFontMeta[] | undefined) ?? []
+    const next = [...index.filter((m) => m.id !== meta.id), meta]
+    await figma.clientStorage.setAsync(FONT_INDEX_KEY, next)
+  })
+}
+
+export async function deleteFont(id: string): Promise<void> {
   await figma.clientStorage.deleteAsync(FONT_DATA_PREFIX + id)
-  await figma.clientStorage.setAsync(
-    FONT_INDEX_KEY,
-    index.filter((m) => m.id !== id)
-  )
+  await withFontIndexLock(async () => {
+    const index = ((await figma.clientStorage.getAsync(FONT_INDEX_KEY)) as StoredFontMeta[] | undefined) ?? []
+    await figma.clientStorage.setAsync(
+      FONT_INDEX_KEY,
+      index.filter((m) => m.id !== id)
+    )
+  })
 }
 
 /* ------------------------------------------------------------------ */
