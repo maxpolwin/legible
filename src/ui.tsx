@@ -17,6 +17,7 @@ import {
   Container,
   Divider,
   FileUploadButton,
+  IconDragHandle16,
   IconInfo16,
   IconWarning16,
   LoadingIndicator,
@@ -346,7 +347,7 @@ function Plugin(): JSX.Element {
             if (remember) emit<StoreFontHandler>('STORE_FONT', meta, bytes)
           }
         } catch {
-          emit<NotifyHandler>('NOTIFY', `Could not read font file “${file.name}”`, true)
+          emit<NotifyHandler>('NOTIFY', `Could not read font file "${file.name}"`, true)
         }
       }
     },
@@ -429,29 +430,27 @@ function Plugin(): JSX.Element {
                 </span>
                 <button
                   type="button"
-                  class="iconbtn"
-                  aria-label={`Move ${frame.name} up`}
-                  disabled={index === 0}
-                  onClick={() => setFrameOrder((previous) => moveItem(previous, index, index - 1))}
-                >
-                  ↑
-                </button>
-                <button
-                  type="button"
-                  class="iconbtn"
-                  aria-label={`Move ${frame.name} down`}
-                  disabled={index === frames.length - 1}
-                  onClick={() => setFrameOrder((previous) => moveItem(previous, index, index + 1))}
-                >
-                  ↓
-                </button>
-                <button
-                  type="button"
                   class="textbtn"
                   aria-expanded={expandedFrame === frame.id}
                   onClick={() => setExpandedFrame(expandedFrame === frame.id ? null : frame.id)}
                 >
                   Reading order
+                </button>
+                <button
+                  type="button"
+                  class="iconbtn"
+                  aria-label={`Reorder ${frame.name}. Drag, or press Arrow Up or Arrow Down while focused, to move.`}
+                  onKeyDown={(event) => {
+                    if (event.key === 'ArrowUp' && index > 0) {
+                      event.preventDefault()
+                      setFrameOrder((previous) => moveItem(previous, index, index - 1))
+                    } else if (event.key === 'ArrowDown' && index < frames.length - 1) {
+                      event.preventDefault()
+                      setFrameOrder((previous) => moveItem(previous, index, index + 1))
+                    }
+                  }}
+                >
+                  <IconDragHandle16 />
                 </button>
               </div>
               {expandedFrame === frame.id && (
@@ -470,7 +469,7 @@ function Plugin(): JSX.Element {
                         <button
                           type="button"
                           class="iconbtn"
-                          aria-label={`Read “${text.preview.slice(0, 24)}” earlier`}
+                          aria-label={`Read "${text.preview.slice(0, 24)}" earlier`}
                           disabled={textIndex === 0}
                           onClick={() =>
                             setTextOrders((previous) => ({
@@ -484,7 +483,7 @@ function Plugin(): JSX.Element {
                         <button
                           type="button"
                           class="iconbtn"
-                          aria-label={`Read “${text.preview.slice(0, 24)}” later`}
+                          aria-label={`Read "${text.preview.slice(0, 24)}" later`}
                           disabled={textIndex === order.length - 1}
                           onClick={() =>
                             setTextOrders((previous) => ({
@@ -586,7 +585,7 @@ function Plugin(): JSX.Element {
       />
       <VerticalSpace space="extraSmall" />
       <Text>
-        <Muted class="small">Saves as “{filename}” — the date updates automatically.</Muted>
+        <Muted class="small">Saves as "{filename}".</Muted>
       </Text>
       <VerticalSpace space="extraSmall" />
       <Textbox placeholder="Author (PDF metadata)" value={author} onValueInput={setAuthor} />
@@ -598,7 +597,7 @@ function Plugin(): JSX.Element {
       <VerticalSpace space="small" />
 
       <Text>
-        <Bold>Image resolution</Bold>
+        <Bold>Resolution</Bold>
       </Text>
       <VerticalSpace space="extraSmall" />
       <div class="dpi-row">
