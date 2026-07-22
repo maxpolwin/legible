@@ -326,7 +326,7 @@ describe.skipIf(!FIXTURES_PRESENT)('metadata (FR-1)', () => {
     const doc = await PDFDocument.load(bytes, { updateMetadata: false })
     expect(doc.getTitle()).toBe(META.title)
     expect(doc.getAuthor()).toBe(META.author)
-    expect(doc.getProducer()).toBe('Legible')
+    expect(doc.getProducer()).toBe('Legible PDF')
     const lang = doc.catalog.get(PDFName.of('Lang'))
     expect(lang).toBeDefined()
     const viewerPrefs = doc.catalog.getOrCreateViewerPreferences()

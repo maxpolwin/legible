@@ -449,8 +449,8 @@ export async function buildPdf(input: BuildInput): Promise<BuildOutput> {
 
   doc.setTitle(input.meta.title, { showInWindowTitleBar: true })
   if (input.meta.author) doc.setAuthor(input.meta.author)
-  doc.setCreator('Legible (Figma plugin)')
-  doc.setProducer('Legible')
+  doc.setCreator('Legible PDF (Figma plugin)')
+  doc.setProducer('Legible PDF')
   if (input.meta.language) doc.setLanguage(input.meta.language)
   attachMetadataStream(doc, input.meta)
 

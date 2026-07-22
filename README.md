@@ -1,4 +1,4 @@
-# Legible
+# Legible PDF
 
 Export Figma frames as **genuinely machine-readable PDFs** — selectable,
 searchable, ATS-parseable, screen-reader-navigable — without giving up the
@@ -7,7 +7,7 @@ pixel-perfect layout.
 Figma's native PDF export converts all text to vector outlines: nothing is
 selectable, searchable or copy-pasteable, ATS systems (Greenhouse & friends)
 extract zero characters, screen readers get nothing, and a 2-page text CV
-weighs 2.6 MB. Legible rebuilds the export with real, embedded, subsetted
+weighs 2.6 MB. Legible PDF rebuilds the export with real, embedded, subsetted
 fonts and a tagged structure tree — the same document lands at ~20–100 KB
 with 100% extractable text.
 
@@ -50,7 +50,7 @@ publishing is a later step.
 
 ## Why the plugin asks for font files
 
-The Figma plugin API does not expose font binaries, and Legible makes no
+The Figma plugin API does not expose font binaries, and Legible PDF makes no
 network requests by design. So the first time you export, drop the `.ttf` /
 `.otf` files for the fonts your design uses onto the Fonts panel. With
 "Remember fonts" enabled they are stored in `figma.clientStorage` (local to
@@ -65,7 +65,7 @@ npm run build        # bundles the plugin and writes manifest.json
 ```
 
 In the **Figma desktop app**: Plugins → Development → *Import plugin from
-manifest…* → pick `manifest.json` in this folder. Then run **Legible** from
+manifest…* → pick `manifest.json` in this folder. Then run **Legible PDF** from
 the plugins menu.
 
 Development loop: `npm run watch`.

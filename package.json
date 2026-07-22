@@ -6,6 +6,7 @@
   "private": true,
   "scripts": {
     "build": "build-figma-plugin --typecheck --minify",
+    "postbuild": "cp assets/icon.png build/icon.png",
     "watch": "build-figma-plugin --typecheck --watch",
     "test": "vitest run",
     "test:watch": "vitest",
@@ -36,7 +37,7 @@
       "figma"
     ],
     "id": "1654888182581252507",
-    "name": "Legible",
+    "name": "Legible PDF",
     "main": "src/main.ts",
     "ui": "src/ui.tsx",
     "documentAccess": "dynamic-page",
@@ -44,7 +45,7 @@
       "allowedDomains": [
         "none"
       ],
-      "reasoning": "Legible is fully offline by design: no network access, no telemetry, no analytics."
+      "reasoning": "Legible PDF is fully offline by design: no network access, no telemetry, no analytics."
     }
   }
 }

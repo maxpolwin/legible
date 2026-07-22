@@ -114,7 +114,7 @@ async function main(): Promise<void> {
 
   const { bytes, report } = await buildPdf({
     frames: [frame],
-    meta: { title: '20260703 - Legible Demo', author: 'Max Mustermann', language: 'de-DE' },
+    meta: { title: '20260703 - Legible PDF Demo', author: 'Max Mustermann', language: 'de-DE' },
     fonts,
   })
 

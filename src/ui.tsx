@@ -1,5 +1,5 @@
 /**
- * Legible — plugin UI.
+ * Legible PDF — plugin UI.
  *
  * Runs in the iframe: font management (drop TTF/OTF files, match against
  * the fonts used in the design, fsType + glyph-coverage checks), page/frame
