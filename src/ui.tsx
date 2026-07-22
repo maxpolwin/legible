@@ -16,6 +16,8 @@ import {
   Button,
   Container,
   Divider,
+  Dropdown,
+  type DropdownOption,
   FileUploadButton,
   IconDragHandle16,
   IconInfo16,
@@ -45,11 +47,13 @@ import type {
   StoreFontHandler,
   UiReadyHandler,
 } from './lib/events'
-import { buildFilename, formatDatePrefix, sanitizeName } from './lib/filename'
+import { buildBaseName, defaultExportName, filenameFromBase, stripDatePrefix } from './lib/filename'
 import { checkEmbeddability, matchFont, type FontFileInfo } from './lib/fontmatch'
+import { isKnownLanguageTag, isLanguageTag, LANGUAGES, normalizeLanguageTag } from './lib/languages'
 import { computeReadingOrder } from './lib/order'
 import { buildPdf } from './lib/pdf/build'
 import {
+  DEFAULT_SETTINGS,
   fontId,
   type ExportResult,
   type FontId,
@@ -61,6 +65,15 @@ import {
 } from './lib/types'
 
 const FRAME_CONFIRM_THRESHOLD = 20
+
+/** Sentinel option that swaps the language dropdown for a free-text tag. */
+const CUSTOM_LANGUAGE = '__custom__'
+
+const LANGUAGE_OPTIONS: DropdownOption[] = [
+  ...LANGUAGES.map((option) => ({ value: option.tag, text: `${option.label} — ${option.tag}` })),
+  '-',
+  { value: CUSTOM_LANGUAGE, text: 'Other language tag…' },
+]
 
 interface LoadedFont {
   meta: StoredFontMeta
@@ -132,8 +145,9 @@ function Plugin(): JSX.Element {
   const [expandedFrame, setExpandedFrame] = useState<string | null>(null)
   const [name, setName] = useState('')
   const [author, setAuthor] = useState('')
-  const [language, setLanguage] = useState('de-DE')
-  const [dpi, setDpi] = useState(96)
+  const [language, setLanguage] = useState(DEFAULT_SETTINGS.language)
+  const [customLanguage, setCustomLanguage] = useState(false)
+  const [dpi, setDpi] = useState(DEFAULT_SETTINGS.dpi)
   const [remember, setRemember] = useState(true)
   const [phase, setPhase] = useState<'idle' | 'working' | 'done'>('idle')
   const [progress, setProgress] = useState<ProgressMessage | null>(null)
@@ -142,6 +156,8 @@ function Plugin(): JSX.Element {
   const [needsConfirm, setNeedsConfirm] = useState(false)
   const [dragIndex, setDragIndex] = useState<number | null>(null)
   const settingsLoaded = useRef(false)
+  /** Once the user edits the filename it is theirs — stop re-prefilling it. */
+  const nameEdited = useRef(false)
 
   const frames = useMemo(() => {
     if (!state) return []
@@ -225,23 +241,28 @@ function Plugin(): JSX.Element {
     })
   }, [state, frames, fontStatuses, dpi])
 
-  const filename = buildFilename(new Date(), name)
+  const filename = filenameFromBase(name, new Date())
+
+  /* The dropdown throws on a value it has no option for, so an unrecognized
+     stored tag (or one typed by hand) always resolves to the custom entry. */
+  const languageIsCustom = customLanguage || !isKnownLanguageTag(language)
+  const languageIsValid = isLanguageTag(language)
 
   /* Latest values for the async EXPORT_RESULT handler. */
-  const exportContext = useRef({ fontStatuses, name, author, language, remember, fonts })
-  exportContext.current = { fontStatuses, name, author, language, remember, fonts }
+  const exportContext = useRef({ fontStatuses, name, author, language, remember, fonts, dpi, fileName: '' })
+  exportContext.current = { fontStatuses, name, author, language, remember, fonts, dpi, fileName: state?.fileName ?? '' }
 
   const handleExportResult = useCallback(async (result: ExportResult) => {
     const ctx = exportContext.current
     try {
       setProgress({ message: 'Building PDF…', current: 1, total: 1 })
       const fontBytes = new Map<FontId, Uint8Array>()
-      const fontReport: ReportEntry[] = []
+      const uiReport: ReportEntry[] = []
       for (const [id, status] of ctx.fontStatuses) {
         if (status.kind === 'ok') {
           fontBytes.set(id, status.font.bytes)
           if (status.missingGlyphs.length > 0) {
-            fontReport.push({
+            uiReport.push({
               severity: 'warning',
               frameName: '—',
               message: `“${status.font.info.familyName} ${status.font.info.subfamilyName}” is missing glyphs for: ${status.missingGlyphs}`,
@@ -249,20 +270,32 @@ function Plugin(): JSX.Element {
           }
         }
       }
-      const title = sanitizeName(ctx.name) || 'Export'
+      /* A malformed /Lang misleads screen readers, so drop it rather than
+         write it — but never silently. */
+      const pdfLanguage = isLanguageTag(ctx.language) ? normalizeLanguageTag(ctx.language) : ''
+      if (ctx.language !== '' && pdfLanguage === '') {
+        uiReport.push({
+          severity: 'warning',
+          frameName: '—',
+          message: `“${ctx.language}” is not a valid language tag (expected e.g. “en-US”); the PDF was written without a document language.`,
+        })
+      }
+      const filename = filenameFromBase(ctx.name, new Date())
       const { bytes, report: buildReport } = await buildPdf({
         frames: result.frames,
-        meta: { title: `${formatDatePrefix(new Date())} - ${title}`, author: ctx.author, language: ctx.language },
+        meta: { title: filename.replace(/\.pdf$/, ''), author: ctx.author, language: pdfLanguage },
         fonts: fontBytes,
       })
-      downloadPdf(bytes, buildFilename(new Date(), ctx.name))
+      downloadPdf(bytes, filename)
       emit<SaveSettingsHandler>('SAVE_SETTINGS', {
-        filenameName: ctx.name,
+        /* Only the name part is remembered; the date is re-derived on open. */
+        filenameName: stripDatePrefix(ctx.name),
+        filenameFile: ctx.fileName,
         author: ctx.author,
         language: ctx.language,
-        dpi,
+        dpi: ctx.dpi,
       })
-      setReport([...result.report, ...fontReport, ...buildReport])
+      setReport([...result.report, ...uiReport, ...buildReport])
       setPhase('done')
       setProgress(null)
     } catch (err) {
@@ -284,10 +317,18 @@ function Plugin(): JSX.Element {
       })
       if (!settingsLoaded.current) {
         settingsLoaded.current = true
-        setName(next.settings.filenameName || sanitizeName(next.fileName))
         setAuthor(next.settings.author)
-        setLanguage(next.settings.language)
+        setLanguage(normalizeLanguageTag(next.settings.language))
         setDpi(next.settings.dpi)
+      }
+      /* Re-derived until the user edits the box, so the date prefix stays
+         today's. A remembered name only applies to the file it was typed in;
+         anywhere else the current file (or page) name is the better
+         default (FR-3). */
+      if (!nameEdited.current) {
+        const remembered =
+          next.settings.filenameFile === next.fileName ? next.settings.filenameName : ''
+        setName(buildBaseName(new Date(), remembered || defaultExportName(next.fileName, next.pageName)))
       }
     })
     const offStored = on<StoredFontsHandler>('STORED_FONTS', (entries) => {
@@ -577,20 +618,67 @@ function Plugin(): JSX.Element {
         <Bold>File</Bold>
       </Text>
       <VerticalSpace space="extraSmall" />
+      <span class="field-label" id="filename-label">
+        Filename
+      </span>
       <Textbox
-        placeholder="Filename (e.g. Bewerbung Mustermann)"
+        aria-labelledby="filename-label"
+        placeholder={buildBaseName(new Date(), defaultExportName(state.fileName, state.pageName))}
         value={name}
-        onValueInput={setName}
-
+        onValueInput={(value) => {
+          nameEdited.current = true
+          setName(value)
+        }}
       />
       <VerticalSpace space="extraSmall" />
       <Text>
-        <Muted class="small">Saves as "{filename}".</Muted>
+        <Muted class="small">
+          Saves as "{filename}". The yyyymmdd prefix starts at today's date — edit any part of it.
+        </Muted>
       </Text>
       <VerticalSpace space="extraSmall" />
-      <Textbox placeholder="Author (PDF metadata)" value={author} onValueInput={setAuthor} />
+      <span class="field-label" id="author-label">
+        Author (PDF metadata)
+      </span>
+      <Textbox aria-labelledby="author-label" placeholder="e.g. Max Mustermann" value={author} onValueInput={setAuthor} />
       <VerticalSpace space="extraSmall" />
-      <Textbox placeholder="Language (e.g. de-DE)" value={language} onValueInput={setLanguage} />
+      <span class="field-label" id="language-label">
+        Language (PDF metadata)
+      </span>
+      <Dropdown
+        aria-label="Document language"
+        options={LANGUAGE_OPTIONS}
+        value={languageIsCustom ? CUSTOM_LANGUAGE : language}
+        onValueChange={(value) => {
+          if (value === CUSTOM_LANGUAGE) {
+            setCustomLanguage(true)
+            return
+          }
+          setCustomLanguage(false)
+          setLanguage(value)
+        }}
+      />
+      {languageIsCustom && (
+        <Fragment>
+          <VerticalSpace space="extraSmall" />
+          <Textbox
+            aria-label="Custom language tag"
+            placeholder="Language tag (e.g. en-US)"
+            value={language}
+            onValueInput={(value) => setLanguage(normalizeLanguageTag(value))}
+          />
+        </Fragment>
+      )}
+      <VerticalSpace space="extraSmall" />
+      <Text>
+        <Muted class="small">
+          {language === ''
+            ? 'No document language will be written; screen readers fall back to their own default.'
+            : languageIsValid
+              ? `Screen readers use this to pronounce the text — written to the PDF as "${language}".`
+              : `⚠ "${language}" is not a valid tag (expected e.g. "en-US"); the PDF would be written without a document language.`}
+        </Muted>
+      </Text>
 
       <VerticalSpace space="small" />
       <Divider />

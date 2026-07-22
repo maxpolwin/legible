@@ -49,6 +49,18 @@ desktop app (Plugins → Development → Import plugin from manifest…):
 - [x] **Performance**: 2-page export < 5 s; progress indicator visible for
       longer runs (§8).
 - [x] **Filename persistence** across plugin restarts (FR-3).
+- [ ] **Filename default** (FR-3): open the plugin in a fresh file → the box
+      is prefilled with `yyyymmdd - <file name>` and "Saves as" appends
+      `.pdf`; a name typed in file A must not leak into file B; in an
+      "Untitled" file the page (tab) name is used instead.
+- [ ] **Filename editability** (FR-3): overwrite the date prefix (e.g. to
+      `20260101 - …`) → the export uses exactly that; changing the Figma
+      selection afterwards must not reset the edit; reopening the plugin
+      restores the name with *today's* prefix, not the edited one.
+- [ ] **Language dropdown**: pick a tag → `/Lang` in the exported PDF matches;
+      "Other language tag…" accepts a hand-typed tag (`gsw-CH`), lowercases
+      to canonical form, and an invalid tag (`german`) is omitted from the
+      PDF and named in the export report.
 - [x] **veraPDF** — PDF/UA-1 compliant, see [SPIKE.md](SPIKE.md).
 - [x] **Screen reader spot check** — see [SPIKE.md](SPIKE.md).
 

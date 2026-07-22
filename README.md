@@ -35,8 +35,14 @@ publishing is a later step.
   text rectangles, wired into the structure tree via OBJR.
 - **Multi-frame ordering** — canvas position by default, drag *and*
   keyboard move buttons to reorder.
-- **Filename pattern persistence** — `yyyymmdd - name.pdf`, date always
-  today, name remembered via `figma.clientStorage`.
+- **Filename pattern persistence** — the box is prefilled with
+  `yyyymmdd - <Figma file name>` (falling back to the page tab when the file
+  is still "Untitled") and stays fully editable, date prefix included. The
+  name part is remembered per file via `figma.clientStorage`; the prefix is
+  re-derived from today's date each time the plugin opens.
+- **Document language picker** — BCP-47 tags (`de-DE`, `en-US`, …) from a
+  dropdown, or any other tag typed by hand; a malformed tag is reported and
+  omitted rather than written to `/Lang`.
 - **Raster control** — DPI input with ATS (≤96) / Balanced (≤150) / Print
   zone badge (icon + label, not color-only) and a live size estimate. Vector
   text is unaffected by DPI.
@@ -109,7 +115,8 @@ src/lib/
   fontmatch.ts           Family/style matching + fsType embedding policy
   svgpath.ts, matrix.ts  Path/affine math for outline fallback & rotation
   estimate.ts            DPI zones + live size estimate
-  filename.ts            yyyymmdd pattern
+  filename.ts            editable `yyyymmdd - name` box + default from file/page
+  languages.ts           BCP-47 tags for the /Lang dropdown
   pdf/build.ts           PDF assembly (pdf-lib + fontkit, subset embedding)
   pdf/tags.ts            Hand-built tagged-PDF structure tree
   pdf/ops.ts             Raw content-stream operators (BDC/EMC, text, paths)

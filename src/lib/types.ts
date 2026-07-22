@@ -166,14 +166,23 @@ export interface StoredFontMeta {
 }
 
 export interface PluginSettings {
+  /** Base filename the user typed, without the date prefix or extension. */
   filenameName: string
+  /**
+   * The Figma file `filenameName` was saved for. Settings live in
+   * clientStorage, which is per user and not per file, so without this a name
+   * typed in one file would shadow the next file's own name (FR-3).
+   */
+  filenameFile: string
   author: string
+  /** BCP-47 tag written to the PDF catalog, e.g. "de-DE". */
   language: string
   dpi: number
 }
 
 export const DEFAULT_SETTINGS: PluginSettings = {
   filenameName: '',
+  filenameFile: '',
   author: '',
   language: 'de-DE',
   dpi: 96,
@@ -182,6 +191,8 @@ export const DEFAULT_SETTINGS: PluginSettings = {
 export interface StateMessage {
   /** The Figma file's name, used to default the export filename (FR-3). */
   fileName: string
+  /** The current page (tab) name; used when the file itself is unnamed. */
+  pageName: string
   /** True when nothing was selected and the whole file is in scope. */
   scopedAll: boolean
   frames: FrameSummary[]

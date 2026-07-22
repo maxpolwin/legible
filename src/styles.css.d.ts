@@ -5,6 +5,7 @@ declare const styles: {
   readonly "badge-print": string;
   readonly "dpi-row": string;
   readonly "drag-over": string;
+  readonly "field-label": string;
   readonly "font-status": string;
   readonly "grow": string;
   readonly "iconbtn": string;

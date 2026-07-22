@@ -553,6 +553,7 @@ async function sendState(): Promise<void> {
   const storedFonts = await loadStoredFonts()
   emit('STATE', {
     fileName: figma.root.name,
+    pageName: figma.currentPage.name,
     scopedAll,
     frames: summaries,
     neededFonts: [...neededFonts.values()],
