@@ -46,6 +46,15 @@ publishing is a later step.
 - **Raster control** — DPI input with ATS (≤96) / Balanced (≤150) / Print
   zone badge (icon + label, not color-only) and a live size estimate. Vector
   text is unaffected by DPI.
+- **Built-in fonts** — Inter, Roboto, Open Sans and Lato (all weights and
+  italics) ship inside the plugin as Latin subsets, so designs using them
+  export as real text with no upload.
+- **Your own fonts, saved once** — drop in `.ttf` / `.otf` files (static or
+  variable) and they are remembered on your machine; the Fonts panel lists
+  them with a **Remove** button and a storage meter.
+- **Clear warning before export** — if any font has no usable file, a banner
+  says how many fonts will export as outlines (not selectable, not
+  ATS-readable) before you click Export.
 - **Non-embeddable fonts never block** — restricted-license (fsType) or
   missing fonts fall back to vector outlines (raster as last resort) for the
   affected nodes only; the post-export report says exactly what and where,
@@ -54,28 +63,31 @@ publishing is a later step.
 - **Fully offline** — `networkAccess.allowedDomains: ["none"]`, zero
   telemetry. Architectural invariant, not a setting.
 
-## Why the plugin asks for font files
+## Fonts
 
 legible PDF ships built-in Latin subsets of Inter, Roboto, Open Sans and Lato
 (all weights and italics, SIL OFL), so designs using those need no upload. For
 a release build, generate them first: `npm run fonts` (downloads hash-pinned
-sources, builds with fonttools; needs python3 and network), then `npm run build`.
-Without them the plugin still builds, just with no built-in fonts.
+sources and builds with fonttools; needs python3 and network), then
+`npm run build`. Without them the plugin still builds, just with no built-in
+fonts.
 
 For any other font: the Figma plugin API does not expose font binaries, and
-legible PDF makes no network requests by design. So the first time you export, drop the `.ttf` /
-`.otf` files for the fonts your design uses onto the Fonts panel. With
-they are always saved in `figma.clientStorage` (local to your machine, about
-5 MB per plugin) and future exports are one click. The Fonts panel lists the
-saved fonts with a **Remove** button each, to free space.
+legible PDF makes no network requests by design. So drop the `.ttf` / `.otf`
+files for the fonts your design uses onto the Fonts panel once. They are
+always saved in `figma.clientStorage` (local to your machine, about 5 MB per
+plugin) and future exports are one click. The Fonts panel lists the saved
+fonts with a **Remove** button each, to free space.
 
 Variable fonts (for example Google Fonts' `SourceSans3[wght].ttf`) work too:
 each named style (Regular, SemiBold, Bold, …) becomes its own face, and a
 static instance of just the characters you use is built at export, so the PDF
 embeds the right weight. Kerning and ligatures are not carried into such
 instances. Variable fonts with CFF2 outlines, or without named styles, are
-rejected with a message — use their static files instead. License embedding flags
-(OS/2 `fsType`) and glyph coverage (e.g. umlauts) are checked before export.
+rejected with a message — use their static files instead.
+
+License embedding flags (OS/2 `fsType`) and glyph coverage (e.g. umlauts) are
+checked before export.
 
 ## Getting started
 

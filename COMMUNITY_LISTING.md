@@ -34,15 +34,20 @@ where Figma drew it.
   extract cleanly instead of splitting mid-word
 - Multi-frame merge into one PDF, with drag-and-keyboard reordering
 - A DPI control with ATS / Balanced / Print guidance and a live size estimate
+- Inter, Roboto, Open Sans and Lato are built in — no font upload needed for
+  designs that use them
+- Any other font works too, static or variable: add the files once, they're
+  remembered, and you can remove them any time to free space
+- A clear warning before export if some text would fall back to outlines
 - Fonts you don't have permission to embed automatically fall back to vector
   outlines for just that text — export never blocks, and the report tells
   you exactly what happened and where
 
-**Fonts:** Inter, Roboto, Open Sans and Lato (all weights) are built in. For
-any other font, the Figma plugin API doesn't expose font binaries and legible
-PDF makes zero network requests by design — everything runs offline, with no
-telemetry — so you drop in the `.ttf`/`.otf` files once (variable fonts work
-too); they're remembered for next time, and you can remove them to free space.
+**Why other fonts need a file:** the Figma plugin API doesn't expose font
+binaries, and legible PDF makes zero network requests by design — everything
+runs offline, with no telemetry. So for fonts that aren't built in, you add the
+`.ttf`/`.otf` files once (Google Fonts' variable files work too); they're saved
+on your machine and reused for every export.
 
 Built originally for exporting Figma-designed résumés/CVs that need to
 survive an ATS — but works for any frame: reports, one-pagers, posters with
@@ -113,19 +118,28 @@ the URL above.
 Cover banner: [assets/cover.png](assets/cover.png) (1920×1080, reuses the
 icon's outline-to-text motif).
 
-Carousel screenshots, captured against a dummy Lorem Ipsum CV in Figma:
+Carousel screenshots (taken from the real built plugin UI, run against text
+from an actual CV; regenerate after UI changes):
 
 - [assets/screenshot-cv-pages.png](assets/screenshot-cv-pages.png) — the
   two-page demo CV rendered in Figma, showing headings, mixed bold/italic
   subheadings, bullet lists, and a live hyperlink.
-- [assets/screenshot-report.png](assets/screenshot-report.png) — the legible
-  PDF panel with fonts embedded and ready ("Lato Bold ready" / "Lato Regular
-  ready") right before export.
+- [assets/screenshot-fonts.png](assets/screenshot-fonts.png) — frames to
+  export plus the Fonts panel with Inter shown as "built-in".
+- [assets/screenshot-saved-fonts.png](assets/screenshot-saved-fonts.png) — a
+  variable font (Source Sans 3) added once, shown as saved with its size, the
+  storage meter and a Remove button.
+- [assets/screenshot-outline-warning.png](assets/screenshot-outline-warning.png)
+  — the warning banner shown when a font has no usable file.
+- [assets/screenshot-report.png](assets/screenshot-report.png) — the panel
+  after a clean export: "Exported with no warnings — all text is real,
+  selectable text."
 - [assets/screenshot-reading-order.png](assets/screenshot-reading-order.png)
   — the reading-order list, showing every paragraph with up/down reorder
   controls.
 
-- [assets/demo.mp4](assets/demo.mp4) — a full feature-tour video (converted
+- [assets/demo.mp4](assets/demo.mp4) — **recorded before the font updates, so
+  it shows the older UI; re-record it before publishing if you want it to match** — a full feature-tour video (converted
   from `assets/demo.gif`, which Figma's carousel picker rejects — it only
   accepts static images and video, not animated GIF): fonts going ready,
   reordering paragraphs in the reading-order list, setting the PDF
