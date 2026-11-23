@@ -13,6 +13,7 @@ declare const styles: {
   readonly "report": string;
   readonly "report-entry": string;
   readonly "row": string;
+  readonly "saved-fonts": string;
   readonly "section-title": string;
   readonly "small": string;
   readonly "sublist": string;
