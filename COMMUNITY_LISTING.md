@@ -138,14 +138,14 @@ from an actual CV; regenerate after UI changes):
   — the reading-order list, showing every paragraph with up/down reorder
   controls.
 
-- [assets/demo.mp4](assets/demo.mp4) — **recorded before the font updates, so
-  it shows the older UI; re-record it before publishing if you want it to match** — a full feature-tour video (converted
-  from `assets/demo.gif`, which Figma's carousel picker rejects — it only
-  accepts static images and video, not animated GIF): fonts going ready,
-  reordering paragraphs in the reading-order list, setting the PDF
-  author/locale metadata, sliding the DPI control from ATS through Balanced
-  to Print, and exporting. `assets/demo.gif` is kept in the repo for use
-  elsewhere (e.g. the README), just not uploaded to Community.
+- [assets/demo.mp4](assets/demo.mp4) — a 20-second feature tour (800×1120,
+  H.264; Figma's carousel picker rejects animated GIF, so use this MP4):
+  built-in Inter fonts ready, the reading-order list, filename/author/language
+  metadata, the DPI control moving from ATS to Balanced to Print, a clean
+  export, then a font that isn't built in (warning banner) fixed by adding
+  Google's variable file once. Rebuilt from the real UI with
+  `scripts/ui-harness` and `scripts/frames-to-mp4.swift` (macOS, no ffmpeg).
+  `assets/demo.gif` is the older recording, kept only for other uses.
 
 Figma allows up to 9 images/videos in the carousel, so there's room for more
 if useful.
