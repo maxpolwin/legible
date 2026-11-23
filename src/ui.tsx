@@ -26,7 +26,6 @@ import {
   Muted,
   Text,
   Textbox,
-  Toggle,
   VerticalSpace,
   render,
 } from '@create-figma-plugin/ui'
@@ -65,6 +64,10 @@ import {
 } from './lib/types'
 
 const FRAME_CONFIRM_THRESHOLD = 20
+
+/** figma.clientStorage allows ~5 MB per plugin; fonts are stored as base64 (+33%). */
+const FONT_STORAGE_BUDGET_BYTES = 5 * 1024 * 1024
+const FONT_STORAGE_WARN_RATIO = 0.8
 
 /** Sentinel option that swaps the language dropdown for a free-text tag. */
 const CUSTOM_LANGUAGE = '__custom__'
@@ -148,7 +151,6 @@ function Plugin(): JSX.Element {
   const [language, setLanguage] = useState(DEFAULT_SETTINGS.language)
   const [customLanguage, setCustomLanguage] = useState(false)
   const [dpi, setDpi] = useState(DEFAULT_SETTINGS.dpi)
-  const [remember, setRemember] = useState(true)
   const [phase, setPhase] = useState<'idle' | 'working' | 'done'>('idle')
   const [progress, setProgress] = useState<ProgressMessage | null>(null)
   const [report, setReport] = useState<ReportEntry[]>([])
@@ -249,8 +251,8 @@ function Plugin(): JSX.Element {
   const languageIsValid = isLanguageTag(language)
 
   /* Latest values for the async EXPORT_RESULT handler. */
-  const exportContext = useRef({ fontStatuses, name, author, language, remember, fonts, dpi, fileName: '' })
-  exportContext.current = { fontStatuses, name, author, language, remember, fonts, dpi, fileName: state?.fileName ?? '' }
+  const exportContext = useRef({ fontStatuses, name, author, language, fonts, dpi, fileName: '' })
+  exportContext.current = { fontStatuses, name, author, language, fonts, dpi, fileName: state?.fileName ?? '' }
 
   const handleExportResult = useCallback(async (result: ExportResult) => {
     const ctx = exportContext.current
@@ -367,6 +369,22 @@ function Plugin(): JSX.Element {
     }
   }, [handleExportResult])
 
+  /* Every font the plugin has saved (uploads are always persisted), one row
+     per font file, so the user can free storage by removing some. */
+  const savedFonts = useMemo(() => {
+    const byId = new Map<string, StoredFontMeta>()
+    for (const f of fonts) byId.set(f.meta.id, f.meta)
+    return [...byId.values()].sort((a, b) =>
+      `${a.family} ${a.style}`.localeCompare(`${b.family} ${b.style}`)
+    )
+  }, [fonts])
+  const savedBytes = savedFonts.reduce((sum, m) => sum + Math.ceil((m.byteLength * 4) / 3), 0)
+
+  const removeSavedFont = useCallback((id: string) => {
+    setFonts((previous) => previous.filter((f) => f.meta.id !== id))
+    emit<DeleteFontHandler>('DELETE_FONT', id)
+  }, [])
+
   const handleFontFiles = useCallback(
     async (files: File[]) => {
       for (const file of files) {
@@ -385,14 +403,15 @@ function Plugin(): JSX.Element {
               ...previous.filter((f) => f.meta.id !== meta.id),
               { meta, info, bytes, source: 'upload', fkFont: fk },
             ])
-            if (remember) emit<StoreFontHandler>('STORE_FONT', meta, bytes)
+            // Uploaded fonts are always persisted so they are never asked for again.
+            emit<StoreFontHandler>('STORE_FONT', meta, bytes)
           }
         } catch {
           emit<NotifyHandler>('NOTIFY', `Could not read font file "${file.name}"`, true)
         }
       }
     },
-    [remember]
+    []
   )
 
   const startExport = useCallback(() => {
@@ -606,9 +625,36 @@ function Plugin(): JSX.Element {
         </Fragment>
       )}
       <VerticalSpace space="extraSmall" />
-      <Toggle value={remember} onValueChange={setRemember}>
-        <Text>Remember fonts on this machine</Text>
-      </Toggle>
+      <Text>
+        <Muted>Added fonts are saved on this machine and reused for every export.</Muted>
+      </Text>
+      {savedFonts.length > 0 && (
+        <Fragment>
+          <VerticalSpace space="extraSmall" />
+          <span class="field-label" id="saved-fonts-label">
+            Saved fonts · {formatBytes(savedBytes)} of about {formatBytes(FONT_STORAGE_BUDGET_BYTES)} used
+            {savedBytes >= FONT_STORAGE_BUDGET_BYTES * FONT_STORAGE_WARN_RATIO ? ' — nearly full, remove fonts you no longer need' : ''}
+          </span>
+          <ul class="saved-fonts" aria-labelledby="saved-fonts-label">
+            {savedFonts.map((m) => (
+              <li key={m.id} class="row">
+                <span class="grow small">
+                  {m.family} {m.style}
+                </span>
+                <span class="muted small">{formatBytes(m.byteLength)}</span>
+                <button
+                  type="button"
+                  class="textbtn"
+                  aria-label={`Remove saved font ${m.family} ${m.style}`}
+                  onClick={() => removeSavedFont(m.id)}
+                >
+                  Remove
+                </button>
+              </li>
+            ))}
+          </ul>
+        </Fragment>
+      )}
 
       <VerticalSpace space="small" />
       <Divider />

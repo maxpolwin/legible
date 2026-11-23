@@ -59,8 +59,9 @@ publishing is a later step.
 The Figma plugin API does not expose font binaries, and legible PDF makes no
 network requests by design. So the first time you export, drop the `.ttf` /
 `.otf` files for the fonts your design uses onto the Fonts panel. With
-"Remember fonts" enabled they are stored in `figma.clientStorage` (local to
-your machine) and future exports are one click. License embedding flags
+they are always saved in `figma.clientStorage` (local to your machine, about
+5 MB per plugin) and future exports are one click. The Fonts panel lists the
+saved fonts with a **Remove** button each, to free space. License embedding flags
 (OS/2 `fsType`) and glyph coverage (e.g. umlauts) are checked before export.
 
 ## Getting started

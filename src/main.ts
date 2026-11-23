@@ -583,12 +583,12 @@ export default function main(): void {
 
   on<StoreFontHandler>('STORE_FONT', (meta, bytes) => {
     storeFont(meta, bytes).catch(() =>
-      emit('NOTIFY', `Could not store ${meta.family} ${meta.style} (storage limit?)`, true)
+      figma.notify(`Could not save ${meta.family} ${meta.style} (storage full? remove saved fonts)`, { error: true })
     )
   })
 
   on<DeleteFontHandler>('DELETE_FONT', (id) => {
-    deleteFont(id).catch(() => undefined)
+    deleteFont(id).catch(() => figma.notify('Could not remove the saved font', { error: true }))
   })
 
   on<NotifyHandler>('NOTIFY', (message, error) => {
