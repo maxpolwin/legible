@@ -19,3 +19,6 @@ test/test pdfs/
 
 # OS noise
 .DS_Store
+
+# Generated bundled fonts (run scripts/build-fonts.sh)
+build-fonts/
