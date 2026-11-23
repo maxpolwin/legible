@@ -47,7 +47,9 @@ import type {
   UiReadyHandler,
 } from './lib/events'
 import { buildBaseName, defaultExportName, filenameFromBase, stripDatePrefix } from './lib/filename'
-import { checkEmbeddability, fsTypeToBits, matchFont, type FontFileInfo } from './lib/fontmatch'
+import { expandFaces, type FaceSource, type FontFace } from './lib/fontfaces'
+import { checkEmbeddability, matchFont, type FontFileInfo } from './lib/fontmatch'
+import { buildStaticInstance } from './lib/instancefont'
 import { isKnownLanguageTag, isLanguageTag, LANGUAGES, normalizeLanguageTag } from './lib/languages'
 import { computeReadingOrder } from './lib/order'
 import { buildPdf } from './lib/pdf/build'
@@ -83,16 +85,9 @@ interface LoadedFont {
   info: FontFileInfo
   bytes: Uint8Array
   source: 'stored' | 'upload'
-  fkFont: FontkitFont
-}
-
-interface FontkitFont {
-  familyName: string
-  subfamilyName: string
-  postscriptName: string
-  /** fontkit returns a flags object here, not the raw number (see fsTypeToBits). */
-  'OS/2': { fsType: unknown } | null
-  hasGlyphForCodePoint: (codePoint: number) => boolean
+  fkFont: FaceSource
+  /** Variable fonts: a static instance is built from this at export time. */
+  variation?: FontFace['variation']
 }
 
 type FontStatus =
@@ -100,19 +95,22 @@ type FontStatus =
   | { kind: 'blocked'; font: LoadedFont; reason: string }
   | { kind: 'missing' }
 
-function parseFontFile(bytes: Uint8Array): FontkitFont[] {
+function parseFontFile(bytes: Uint8Array): FaceSource[] {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const parsed = (fontkitModule as any).create(bytes)
-  if (parsed && Array.isArray(parsed.fonts)) return parsed.fonts as FontkitFont[]
-  return [parsed as FontkitFont]
+  if (parsed && Array.isArray(parsed.fonts)) return parsed.fonts as FaceSource[]
+  return [parsed as FaceSource]
 }
 
-function fontInfo(fk: FontkitFont): FontFileInfo {
+/** File-level record for storage and the saved-fonts list (one per font file/face, not per style). */
+function fileMeta(fk: FaceSource, expanded: ReturnType<typeof expandFaces>, byteLength: number): StoredFontMeta {
+  const postscriptName = String(fk.postscriptName ?? '')
   return {
-    familyName: String(fk.familyName ?? ''),
-    subfamilyName: String(fk.subfamilyName ?? ''),
-    postscriptName: String(fk.postscriptName ?? ''),
-    fsType: fk['OS/2'] ? fsTypeToBits(fk['OS/2'].fsType) : 0,
+    id: postscriptName || `${expanded.family}-${String(fk.subfamilyName ?? '')}`,
+    family: expanded.family,
+    style: expanded.isVariable ? 'Variable (all weights)' : String(fk.subfamilyName ?? ''),
+    postscriptName,
+    byteLength,
   }
 }
 
@@ -252,8 +250,8 @@ function Plugin(): JSX.Element {
   const languageIsValid = isLanguageTag(language)
 
   /* Latest values for the async EXPORT_RESULT handler. */
-  const exportContext = useRef({ fontStatuses, name, author, language, fonts, dpi, fileName: '' })
-  exportContext.current = { fontStatuses, name, author, language, fonts, dpi, fileName: state?.fileName ?? '' }
+  const exportContext = useRef({ fontStatuses, name, author, language, fonts, dpi, fileName: '', charsByFont: {} as Record<string, string> })
+  exportContext.current = { fontStatuses, name, author, language, fonts, dpi, fileName: state?.fileName ?? '', charsByFont: state?.charsByFont ?? {} }
 
   const handleExportResult = useCallback(async (result: ExportResult) => {
     const ctx = exportContext.current
@@ -263,7 +261,19 @@ function Plugin(): JSX.Element {
       const uiReport: ReportEntry[] = []
       for (const [id, status] of ctx.fontStatuses) {
         if (status.kind === 'ok') {
-          fontBytes.set(id, status.font.bytes)
+          const { variation, info } = status.font
+          if (variation) {
+            /* PDF has no variable fonts: embed a static instance of just the
+               characters this design uses, at the requested weight. */
+            const codePoints = [...(ctx.charsByFont[id] ?? '')].map((ch) => ch.codePointAt(0) as number)
+            fontBytes.set(id, buildStaticInstance(variation.source, variation.settings, codePoints, {
+              family: info.familyName,
+              style: info.subfamilyName,
+              postscriptName: info.postscriptName,
+            }))
+          } else {
+            fontBytes.set(id, status.font.bytes)
+          }
           if (status.missingGlyphs.length > 0) {
             uiReport.push({
               severity: 'warning',
@@ -341,7 +351,11 @@ function Plugin(): JSX.Element {
         for (const entry of entries) {
           try {
             for (const fk of parseFontFile(entry.bytes)) {
-              loaded.push({ meta: entry.meta, info: fontInfo(fk), bytes: entry.bytes, source: 'stored', fkFont: fk })
+              const expanded = expandFaces(fk)
+              if (expanded.error) throw new Error(expanded.error)
+              for (const face of expanded.faces) {
+                loaded.push({ meta: entry.meta, info: face.info, bytes: entry.bytes, source: 'stored', fkFont: face.font, variation: face.variation })
+              }
             }
           } catch {
             // Corrupt stored font: drop it.
@@ -392,17 +406,17 @@ function Plugin(): JSX.Element {
         try {
           const bytes = new Uint8Array(await file.arrayBuffer())
           for (const fk of parseFontFile(bytes)) {
-            const info = fontInfo(fk)
-            const meta: StoredFontMeta = {
-              id: info.postscriptName || `${info.familyName}-${info.subfamilyName}`,
-              family: info.familyName,
-              style: info.subfamilyName,
-              postscriptName: info.postscriptName,
-              byteLength: bytes.byteLength,
+            const expanded = expandFaces(fk)
+            if (expanded.error) {
+              emit<NotifyHandler>('NOTIFY', expanded.error, true)
+              continue
             }
+            const meta = fileMeta(fk, expanded, bytes.byteLength)
             setFonts((previous) => [
               ...previous.filter((f) => f.meta.id !== meta.id),
-              { meta, info, bytes, source: 'upload', fkFont: fk },
+              ...expanded.faces.map(
+                (face): LoadedFont => ({ meta, info: face.info, bytes, source: 'upload', fkFont: face.font, variation: face.variation })
+              ),
             ])
             // Uploaded fonts are always persisted so they are never asked for again.
             emit<StoreFontHandler>('STORE_FONT', meta, bytes)
