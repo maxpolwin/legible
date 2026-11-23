@@ -39,7 +39,7 @@ describe.skipIf(FACES.length === 0)('bundled fonts', () => {
       expect(checkEmbeddability(face.info.fsType).ok, face.file).toBe(true)
       const font = fontkit.create(bundledBytes(face.file))
       expect(font.getName('preferredFamily') ?? font.familyName, face.file).toBe(face.info.familyName)
-      for (const ch of 'ÄÖÜäöüß€–“”') expect(font.hasGlyphForCodePoint(ch.codePointAt(0)), `${face.file} ${ch}`).toBe(true)
+      for (const ch of 'ÄÖÜäöüß€–“”₂²³≈≤') expect(font.hasGlyphForCodePoint(ch.codePointAt(0)), `${face.file} ${ch}`).toBe(true)
     }
   })
 

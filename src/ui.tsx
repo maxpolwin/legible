@@ -663,11 +663,11 @@ function Plugin(): JSX.Element {
           <VerticalSpace space="extraSmall" />
           <Text>
             <Muted>
-              Missing a font file? Most open-source fonts (Inter, Lato, Roboto…) are free at{' '}
+              Inter, Roboto, Open Sans and Lato are built in. For other fonts, most open-source families are free at{' '}
               <a href="https://fonts.google.com" target="_blank" rel="noreferrer">
                 fonts.google.com ↗
-              </a>
-              . Licensed fonts need their own source.
+              </a>{' '}
+              (variable fonts work too). Licensed fonts need their own source.
             </Muted>
           </Text>
         </Fragment>
