@@ -56,8 +56,14 @@ publishing is a later step.
 
 ## Why the plugin asks for font files
 
-The Figma plugin API does not expose font binaries, and legible PDF makes no
-network requests by design. So the first time you export, drop the `.ttf` /
+legible PDF ships built-in Latin subsets of Inter, Roboto, Open Sans and Lato
+(all weights and italics, SIL OFL), so designs using those need no upload. For
+a release build, generate them first: `npm run fonts` (downloads hash-pinned
+sources, builds with fonttools; needs python3 and network), then `npm run build`.
+Without them the plugin still builds, just with no built-in fonts.
+
+For any other font: the Figma plugin API does not expose font binaries, and
+legible PDF makes no network requests by design. So the first time you export, drop the `.ttf` /
 `.otf` files for the fonts your design uses onto the Fonts panel. With
 they are always saved in `figma.clientStorage` (local to your machine, about
 5 MB per plugin) and future exports are one click. The Fonts panel lists the

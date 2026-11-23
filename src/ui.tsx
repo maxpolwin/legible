@@ -47,6 +47,7 @@ import type {
   UiReadyHandler,
 } from './lib/events'
 import { buildBaseName, defaultExportName, filenameFromBase, stripDatePrefix } from './lib/filename'
+import { bundledBytes, bundledFaces, type BundledFace } from './lib/bundledfonts'
 import { expandFaces, type FaceSource, type FontFace } from './lib/fontfaces'
 import { checkEmbeddability, matchFont, type FontFileInfo } from './lib/fontmatch'
 import { buildStaticInstance } from './lib/instancefont'
@@ -84,7 +85,7 @@ interface LoadedFont {
   meta: StoredFontMeta
   info: FontFileInfo
   bytes: Uint8Array
-  source: 'stored' | 'upload'
+  source: 'stored' | 'upload' | 'bundled'
   fkFont: FaceSource
   /** Variable fonts: a static instance is built from this at export time. */
   variation?: FontFace['variation']
@@ -112,6 +113,31 @@ function fileMeta(fk: FaceSource, expanded: ReturnType<typeof expandFaces>, byte
     postscriptName,
     byteLength,
   }
+}
+
+const BUNDLED_FACES = bundledFaces()
+const bundledCache = new Map<string, LoadedFont>()
+
+/** Decode + parse a built-in font only when a design actually needs it. */
+function materializeBundled(face: BundledFace): LoadedFont {
+  const cached = bundledCache.get(face.file)
+  if (cached) return cached
+  const bytes = bundledBytes(face.file)
+  const loaded: LoadedFont = {
+    meta: {
+      id: `bundled:${face.file}`,
+      family: face.info.familyName,
+      style: face.info.subfamilyName,
+      postscriptName: face.info.postscriptName,
+      byteLength: bytes.byteLength,
+    },
+    info: face.info,
+    bytes,
+    source: 'bundled',
+    fkFont: parseFontFile(bytes)[0],
+  }
+  bundledCache.set(face.file, loaded)
+  return loaded
 }
 
 function downloadPdf(bytes: Uint8Array, filename: string): void {
@@ -187,14 +213,19 @@ function Plugin(): JSX.Element {
   const fontStatuses = useMemo(() => {
     const map = new Map<FontId, FontStatus>()
     if (!state) return map
-    const candidates = fonts.map((f) => ({ info: f.info, value: f }))
+    /* The user's own files win over the built-in ones. */
+    const candidates: Array<{ info: FontFileInfo; value: LoadedFont | BundledFace }> = [
+      ...fonts.map((f) => ({ info: f.info, value: f })),
+      ...BUNDLED_FACES.map((f) => ({ info: f.info, value: f })),
+    ]
     for (const needed of state.neededFonts) {
       const id = fontId(needed)
-      const match = matchFont(needed, candidates)
-      if (!match) {
+      const hit = matchFont(needed, candidates)
+      if (!hit) {
         map.set(id, { kind: 'missing' })
         continue
       }
+      const match = { value: 'file' in hit.value ? materializeBundled(hit.value) : hit.value }
       const embeddable = checkEmbeddability(match.value.info.fsType)
       if (!embeddable.ok) {
         map.set(id, { kind: 'blocked', font: match.value, reason: embeddable.reason ?? 'not embeddable' })
@@ -607,7 +638,9 @@ function Plugin(): JSX.Element {
                     ? `missing glyphs: ${status.missingGlyphs.slice(0, 8)}`
                     : status.font.source === 'stored'
                       ? 'remembered'
-                      : 'ready'
+                      : status.font.source === 'bundled'
+                        ? 'built-in'
+                        : 'ready'
                   : status?.kind === 'blocked'
                     ? status.reason
                     : 'no font file — will outline'}
@@ -785,6 +818,15 @@ function Plugin(): JSX.Element {
       <Divider />
       <VerticalSpace space="small" />
 
+      {unembeddableFonts.length > 0 && (
+        <Fragment>
+          <Banner icon={<IconWarning16 />} variant="warning">
+            {unembeddableFonts.length} of {state.neededFonts.length} fonts have no usable font file, so that text will be
+            exported as outlines: not selectable, and not readable by ATS parsers. Add the missing font files above.
+          </Banner>
+          <VerticalSpace space="extraSmall" />
+        </Fragment>
+      )}
       {needsConfirm && (
         <Fragment>
           <Banner icon={<IconWarning16 />} variant="warning">

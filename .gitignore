@@ -22,3 +22,4 @@ test/test pdfs/
 
 # Generated bundled fonts (run scripts/build-fonts.sh)
 build-fonts/
+src/lib/bundledfonts.generated.ts

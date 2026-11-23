@@ -38,10 +38,11 @@ where Figma drew it.
   outlines for just that text — export never blocks, and the report tells
   you exactly what happened and where
 
-**Why it asks for font files:** the Figma plugin API doesn't expose font
-binaries, and legible PDF makes zero network requests by design — everything
-runs offline, with no telemetry. So the first export asks you to drop in the
-`.ttf`/`.otf` files your design uses; it remembers them for next time.
+**Fonts:** Inter, Roboto, Open Sans and Lato (all weights) are built in. For
+any other font, the Figma plugin API doesn't expose font binaries and legible
+PDF makes zero network requests by design — everything runs offline, with no
+telemetry — so you drop in the `.ttf`/`.otf` files once (variable fonts work
+too); they're remembered for next time, and you can remove them to free space.
 
 Built originally for exporting Figma-designed résumés/CVs that need to
 survive an ATS — but works for any frame: reports, one-pagers, posters with

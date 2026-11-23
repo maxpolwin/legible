@@ -5,6 +5,9 @@
   "license": "MIT",
   "private": true,
   "scripts": {
+    "fonts": "sh scripts/build-fonts.sh",
+    "gen-bundled": "node scripts/gen-bundled.mjs",
+    "prebuild": "node scripts/gen-bundled.mjs",
     "build": "build-figma-plugin --typecheck --minify",
     "postbuild": "cp assets/icon.png build/icon.png",
     "watch": "build-figma-plugin --typecheck --watch",
