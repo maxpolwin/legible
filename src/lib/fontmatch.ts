@@ -85,6 +85,25 @@ export interface Embeddability {
 }
 
 /**
+ * fontkit exposes OS/2 fsType as an object of booleans, not the raw number, so
+ * `fsType & mask` on it is always 0 and every font looked embeddable. Convert it
+ * back to the spec's bit field. Unknown shapes yield 0 (unrestricted), matching
+ * fonts that carry no OS/2 table.
+ */
+export function fsTypeToBits(value: unknown): number {
+  if (typeof value === 'number') return value
+  if (value === null || typeof value !== 'object') return 0
+  const flags = value as Record<string, unknown>
+  return (
+    (flags.noEmbedding === true ? 0x0002 : 0) |
+    (flags.viewOnly === true ? 0x0004 : 0) |
+    (flags.editable === true ? 0x0008 : 0) |
+    (flags.noSubsetting === true ? 0x0100 : 0) |
+    (flags.bitmapOnly === true ? 0x0200 : 0)
+  )
+}
+
+/**
  * OS/2 fsType embedding policy. Per the OpenType spec, bits 0-3 form the
  * usage-permissions field where the least restrictive set bit wins;
  * 0x0002 with no other permission bit means "restricted license, no

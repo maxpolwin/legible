@@ -47,7 +47,7 @@ import type {
   UiReadyHandler,
 } from './lib/events'
 import { buildBaseName, defaultExportName, filenameFromBase, stripDatePrefix } from './lib/filename'
-import { checkEmbeddability, matchFont, type FontFileInfo } from './lib/fontmatch'
+import { checkEmbeddability, fsTypeToBits, matchFont, type FontFileInfo } from './lib/fontmatch'
 import { isKnownLanguageTag, isLanguageTag, LANGUAGES, normalizeLanguageTag } from './lib/languages'
 import { computeReadingOrder } from './lib/order'
 import { buildPdf } from './lib/pdf/build'
@@ -90,7 +90,8 @@ interface FontkitFont {
   familyName: string
   subfamilyName: string
   postscriptName: string
-  'OS/2': { fsType: number } | null
+  /** fontkit returns a flags object here, not the raw number (see fsTypeToBits). */
+  'OS/2': { fsType: unknown } | null
   hasGlyphForCodePoint: (codePoint: number) => boolean
 }
 
@@ -111,7 +112,7 @@ function fontInfo(fk: FontkitFont): FontFileInfo {
     familyName: String(fk.familyName ?? ''),
     subfamilyName: String(fk.subfamilyName ?? ''),
     postscriptName: String(fk.postscriptName ?? ''),
-    fsType: fk['OS/2'] ? fk['OS/2'].fsType : 0,
+    fsType: fk['OS/2'] ? fsTypeToBits(fk['OS/2'].fsType) : 0,
   }
 }
 

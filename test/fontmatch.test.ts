@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { checkEmbeddability, matchFont, normalizeStyle, type FontCandidate } from '../src/lib/fontmatch'
+import { checkEmbeddability, fsTypeToBits, matchFont, normalizeStyle, type FontCandidate } from '../src/lib/fontmatch'
 
 function candidate(family: string, subfamily: string, ps = ''): FontCandidate<string> {
   return {
@@ -55,5 +55,24 @@ describe('fsType embeddability policy (FR-5)', () => {
 
   it('blocks bitmap-embedding-only fonts', () => {
     expect(checkEmbeddability(0x0200).ok).toBe(false)
+  })
+})
+
+describe('fsTypeToBits (fontkit flags object)', () => {
+  const flags = (o: object) => ({ noEmbedding: false, viewOnly: false, editable: false, noSubsetting: false, bitmapOnly: false, ...o })
+  it('treats an all-false object as installable (embeddable)', () => {
+    expect(checkEmbeddability(fsTypeToBits(flags({}))).ok).toBe(true)
+  })
+  it('blocks a restricted-license font', () => {
+    expect(checkEmbeddability(fsTypeToBits(flags({ noEmbedding: true }))).ok).toBe(false)
+  })
+  it('allows preview/print and editable embedding', () => {
+    expect(checkEmbeddability(fsTypeToBits(flags({ noEmbedding: true, viewOnly: true }))).ok).toBe(true)
+    expect(checkEmbeddability(fsTypeToBits(flags({ noEmbedding: true, editable: true }))).ok).toBe(true)
+  })
+  it('blocks bitmap-only fonts and passes numbers through', () => {
+    expect(checkEmbeddability(fsTypeToBits(flags({ bitmapOnly: true }))).ok).toBe(false)
+    expect(fsTypeToBits(0x0008)).toBe(0x0008)
+    expect(fsTypeToBits(undefined)).toBe(0)
   })
 })
